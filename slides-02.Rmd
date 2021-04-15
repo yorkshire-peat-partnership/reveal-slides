@@ -1,6 +1,9 @@
 ---
-title: "Current report"
-output: revealjs::revealjs_presentation
+title: "BogBase Report"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  revealjs::revealjs_presentation:
+    theme: simple
 ---
 
 ```{r setup, include=FALSE}
@@ -9,6 +12,8 @@ library(rpostgis)
 library(huxtable)
 library(dplyr)
 library(plotly)
+library(tmap)
+library(sf)
 
 getSQL <- function(filepath){
     con = file(filepath, "r")
@@ -48,8 +53,18 @@ bogbase_con <- function() {
 bogbase_con <- bogbase_con()
 ```
 
+```{r assets, message=FALSE, warning=FALSE, include=FALSE}
 
-## Summary statement
+site_peat_units <- st_read(bogbase_con, query='SELECT site_name, estate_name, geom FROM site_peat_units LEFT JOIN reference.ref_estates USING (estate_id)')
+tm1 <- tmap_leaflet(tm_shape(site_peat_units) + tm_borders(col='red'))
+tm <- tm_shape(site_peat_units) + tm_fill(col='brown') + tm_layout(frame = FALSE, bg.color = "transparent", outer.margins = 0.2)
+
+tmap_save(tm, "assets/img/site_peat_units.png", dpi = 600)
+
+```
+
+
+# Summary statement {data-transition="slide-in fade-out"}
 
 ```{r peaty_intro, echo=FALSE, results='asis'}
 peaty_area <- dbGetQuery(bogbase_con, "SELECT * FROM reporting.peaty_area")
@@ -67,22 +82,28 @@ cat(paste0('To date, YPP has surveyed over **',format(round(surveyed_area,0),big
 
 ```
 
-## Slide with R Code and Output
+# Slide with R Code and Output
 
 ```{r table-test, echo=FALSE}
 huxtable(dbGetQuery(bogbase_con, "SELECT site_name, estate_name FROM site_peat_units JOIN reference.ref_estates USING (estate_id) LIMIT 5;")) %>%       set_bold(1, everywhere)             %>%
       set_bottom_border(1, everywhere) %>% set_align(everywhere, 2, 'right')
 ```
 
-## Slide with Plot
+## {data-background="assets/img/site_peat_units.png"}
+
+## Leaflet map {data-transition="slide-in fade-out"}
+
+`r tm1`
+
+# Erosion feature restoration
 
 ```{r plotly, echo=FALSE, warning=FALSE}
 rp_len <- dbGetQuery(bogbase_con, "SELECT * FROM reporting.restoration_cumulative_works_length_bar")
 rp_len$feature <- factor(rp_len$feature, levels = c('Hag', 'Gully', 'Grip'))
 
-ggplot(rp_len, aes(fill=feature, y=cum_len_km, x=works_month, text = sprintf('%s: %s km', feature, round(cum_len_km,0)))) +
+ggplotly(ggplot(rp_len, aes(fill=feature, y=cum_len_km, x=works_month, text = sprintf('%s: %s km', feature, round(cum_len_km,0)))) +
     geom_bar(position="stack", stat="identity") + labs(title = 'Erosion features restored', x = 'Date', y='Cumulative length (km)', fill = "") +
-    scale_fill_manual(values = c("#D4351C", "#FFDD00", "#5694CA")) + theme_classic()
+    scale_fill_manual(values = c("#D4351C", "#FFDD00", "#5694CA")) + theme_classic())
 ```
 
 ```{r message=TRUE, warning=FALSE, include=FALSE}
