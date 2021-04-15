@@ -1,0 +1,13 @@
+/* This was the only way to make background iframes interactive by ignoring any clicks on the div.slides element that is blocking the maps!
+Now means you can't copy text from the slides and probably won't be able to use touch controls on mobile*/
+
+div.slides{
+  pointer-events: none;
+}
+
+/* Allow selection for certain elements */
+
+.el-selection {
+  pointer-events: auto;
+}
+
