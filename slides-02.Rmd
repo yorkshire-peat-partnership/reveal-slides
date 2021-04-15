@@ -56,10 +56,11 @@ bogbase_con <- bogbase_con()
 ```{r assets, message=FALSE, warning=FALSE, include=FALSE}
 
 site_peat_units <- st_read(bogbase_con, query='SELECT site_name, estate_name, geom FROM site_peat_units LEFT JOIN reference.ref_estates USING (estate_id)')
-tm1 <- tmap_leaflet(tm_shape(site_peat_units) + tm_borders(col='red'))
+tm1 <- tm_shape(site_peat_units) + tm_borders(col='red')
 tm <- tm_shape(site_peat_units) + tm_fill(col='brown') + tm_layout(frame = FALSE, bg.color = "transparent", outer.margins = 0.2)
 
 tmap_save(tm, "assets/img/site_peat_units.png", dpi = 600)
+tmap_save(tm1, "assets/maps/tm1.html")
 
 ```
 
@@ -91,9 +92,7 @@ huxtable(dbGetQuery(bogbase_con, "SELECT site_name, estate_name FROM site_peat_u
 
 ## {data-background="assets/img/site_peat_units.png"}
 
-## Leaflet map {data-transition="slide-in fade-out"}
-
-`r tm1`
+## Leaflet map {data-background-iframe="assets/maps/tm1.html"}
 
 # Erosion feature restoration
 
