@@ -62,11 +62,11 @@ bogbase_con <- bogbase_con()
 site_peat_units <- st_read(bogbase_con, query='SELECT site_name, estate_name, geom FROM site_peat_units LEFT JOIN reference.ref_estates USING (estate_id)')
 unit_status <- st_read(bogbase_con, query='SELECT site_name, full_desc, geom FROM reporting.vw_unit_status_max')
 
-##colnames(site_peat_units) <- c("Site","Estate")
+rename(unit_status, "Site" = site_name, "Max progress to date"= full_desc)
 
 
 tm <- tm_shape(site_peat_units) + tm_fill(col='brown') + tm_layout(frame = FALSE, bg.color = "transparent", outer.margins = 0.2)
-tm1 <- tm_basemap(leaflet::providers$OpenStreetMap) + tm_shape(unit_status) + tm_polygons(id="site_name", col = "full_desc", title = "Site progress")
+tm1 <- tm_basemap(leaflet::providers$OpenStreetMap) + tm_shape(unit_status) + tm_polygons(id="Site", col = "full_desc", title = "Site progress")
 
 tmap_save(tm, "assets/img/site_peat_units.png", dpi = 600)
 tmap_save(tm1, "assets/maps/tm1.html")
@@ -75,18 +75,18 @@ tmap_save(tm1, "assets/maps/tm1.html")
 # Summary statement {data-transition="slide-in fade-out" .el-selection}
 
 ```{r peaty_intro, echo=FALSE, results='asis'}
-peaty_area <- dbGetQuery(bogbase_con, "SELECT * FROM reporting.peaty_area")
+peaty_area <- dbGetQuery(bogbase_con, "SELECT * FROM reporting.peaty_area WHERE region_name IS NOT NULL;")
 
-surveyed_area <- max(peaty_area$surveyed_ha, na.rm = TRUE)
-surveyed_n <- max(peaty_area$site_surveyed_count)
-units_area <- max(peaty_area$site_area_ha)
+surveyed_area <- sum(peaty_area$surveyed_ha, na.rm = TRUE)
+surveyed_n <- sum(peaty_area$site_surveyed_count)
+units_area <- sum(peaty_area$site_area_ha)
 surveyed_perc <- (surveyed_area/units_area)*100
-peat_area <- max(peaty_area$peaty_area_ha)
-peat_area_deep <- max(peaty_area$peaty_area_40_ha)
-c_tonnes <- max(peaty_area$tonnes_carbon)
-c_tonnes_per_ha <- max(peaty_area$tonnes_carbon_per_ha)
+peat_area <- sum(peaty_area$peaty_area_ha)
+peat_area_deep <- sum(peaty_area$peaty_area_40_ha)
+c_tonnes <- sum(peaty_area$tonnes_carbon)
+c_tonnes_per_ha <- mean(peaty_area$tonnes_carbon_per_ha)
 
-cat(paste0('*To date, YPP has surveyed over **',format(round(surveyed_area,0),big.mark=",", trim=TRUE),' ha** of peatland on **',surveyed_n,'** unique sites. With an estimated total of **',format(round(units_area,0),big.mark=",", trim=TRUE),' ha** of peat units to investigate in our project area, YPP has surveyed **',round(surveyed_perc,0),'%** of the area so far. Based on previous surveys, YPP estimates that by the time we survey all **', format(round(units_area,0),big.mark=",", trim=TRUE),' ha**, we expect **',format(round(peat_area,0),big.mark=",", trim=TRUE),'**ha to be actual peaty soils with **',format(round(peat_area_deep,0),big.mark=",", trim=TRUE),' ha** classed as deep peat (\u226540cm). We estimate that, all peaty soils within our project area have locked away a huge **',format(round(c_tonnes,0),big.mark=",", trim=TRUE) ,' tonnes of carbon** which gives an average of **',format(round(c_tonnes_per_ha,0),big.mark=",", trim=TRUE),' tonnes of carbon** per hectare - one of the densest terrestrial carbon stores of any habitat!*'))
+cat(paste0('*To date, YPP has surveyed over **',format(round(surveyed_area,0),big.mark=",", trim=TRUE),' ha** of peatland on **',surveyed_n,'** unique sites. With an estimated total of **',format(round(units_area,0),big.mark=",", trim=TRUE),' ha** of peat units to investigate in our project area, YPP has surveyed **',round(surveyed_perc,0),'%** of the area so far. Based on previous surveys, YPP estimates that by the time we survey all **', format(round(units_area,0),big.mark=",", trim=TRUE),' ha**, we expect **',format(round(peat_area,0),big.mark=",", trim=TRUE),'**ha to be actual peaty soils with **',format(round(peat_area_deep,0),big.mark=",", trim=TRUE),' ha** classed as deep peat (&ge;40cm). We estimate that, all peaty soils within our project area have locked away a huge **',format(round(c_tonnes,0),big.mark=",", trim=TRUE) ,' tonnes of carbon** which gives an average of **',format(round(c_tonnes_per_ha,0),big.mark=",", trim=TRUE),' tonnes of carbon** per hectare - one of the densest terrestrial carbon stores of any habitat!*'))
 
 ```
 
@@ -101,9 +101,9 @@ huxtable(t1) %>% theme_plain() %>% set_width(0.8)
 #{data-background-iframe="assets/maps/tm1.html" style="scale:0"}
 ```
 
-## {data-background="assets/img/site_peat_units.png" data-background-size="contain"}
+# {data-background="assets/img/site_peat_units.png" data-background-size="contain"}
 
-## {data-background-iframe="assets/maps/tm1.html"}
+# {data-background-iframe="assets/maps/tm1.html"}
 
 # Erosion feature restoration {data-transition="slide-in fade-out" .el-selection}
 
