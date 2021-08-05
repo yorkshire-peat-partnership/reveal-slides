@@ -75,7 +75,7 @@ tmap_save(tm1, "assets/maps/tm1.html")
 # Summary statement {data-transition="slide-in fade-out" .el-selection}
 
 ```{r peaty_intro, echo=FALSE, results='asis'}
-peaty_area <- dbGetQuery(bogbase_con, "SELECT * FROM reporting.peaty_area WHERE region_name IS NOT NULL;")
+peaty_area <- dbGetQuery(bogbase_con, "SELECT * FROM reporting.peaty_area ORDER BY site_surveyed_count DESC LIMIT 1")
 
 surveyed_area <- sum(peaty_area$surveyed_ha, na.rm = TRUE)
 surveyed_n <- sum(peaty_area$site_surveyed_count)
